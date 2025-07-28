@@ -1,0 +1,270 @@
+{
+  "name": "retrieval-agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        540,
+        260
+      ],
+      "id": "6c285120-05ca-403b-b71f-10d97af87fdc",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hf5dp5N6zgNCT7tn",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "[Testing information, types and techniques]",
+        "topK": 5
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        940,
+        260
+      ],
+      "id": "d5fc6027-fdfc-4ed4-84f8-4082cbd4616e",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        400
+      ],
+      "id": "228db8b6-e1d8-4410-bbc7-61d20dea805b",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hf5dp5N6zgNCT7tn",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "library-rag-db",
+          "mode": "list",
+          "cachedResultName": "library-rag-db"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        860,
+        460
+      ],
+      "id": "c2d575bc-9f19-4448-9c3e-6110408ff06e",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "1MeHxQSkqgxbBZSS",
+          "name": "PineconeApi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        980,
+        660
+      ],
+      "id": "d25130c7-0f8c-4fde-92e4-e896f7d77b48",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hf5dp5N6zgNCT7tn",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{  \"query\": \"No query provided. Please provide a question to search the database.\"\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        60,
+        60
+      ],
+      "id": "6da00bd2-34e3-4f3b-8023-716a9fbb5583",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a3094337-72e1-4b85-ab1a-fa361d367322",
+              "name": "query",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        60
+      ],
+      "id": "05175404-7870-40f6-81c9-c03910bcef2b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.query }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        680,
+        300
+      ],
+      "id": "dbfc3bc5-794d-4d4d-b8f8-109aee2c6806",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n---\n\n## 🧑‍🎓 **Retriever Agent – User Prompt**\n```text\nThe student has asked the following question:\n\n{{ $json.query }}\n\nSearch the student’s vector database of study materials and return the most relevant text chunks that may help answer this question.\n\nRespond in the format provided in the system message.\n",
+        "options": {
+          "systemMessage": "You are the Retriever Agent in a multi-agent academic assistant system.\n\nYour job is to:\n- Interpret the student’s question\n- Perform a semantic search over the vector database containing their study materials\n- Return 3–5 of the most relevant chunks of information\n\nYou do not answer the question or summarize it — you only find relevant content.\n\nIf the query asks for an “analysis”, “summary”, “critique”, or similar, make sure to still retrieve directly relevant factual content (not conclusions).\n\nReturn the results in this format:\n```json\n{\n  \"retrieved_chunks\": [\n    { \"source\": \"Biology Textbook\", \"text\": \"...\" },\n    { \"source\": \"Lecture Notes\", \"text\": \"...\" }\n  ]\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        560,
+        60
+      ],
+      "id": "e3bd706c-4c9b-434a-947a-3afbd1c6a797",
+      "name": "AI Agent1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f26c6a93-0a7c-4b95-b6d3-be36269e997a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "47602d97fabdb2b1a408047f14a349737380c49fbf81b41a1e12433e4923c3e1"
+  },
+  "id": "rhpsI2Cq7RXyKuKP",
+  "tags": []
+}
