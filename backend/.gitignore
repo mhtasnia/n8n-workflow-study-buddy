@@ -114,11 +114,13 @@ venv.bak/
 
 venv
 venv/
+.venv/
+env/
 
 
  .env/
 .env.local
-
+ 
 # Sublime Text # 
 *.tmlanguage.cache 
 *.tmPreferences.cache 
