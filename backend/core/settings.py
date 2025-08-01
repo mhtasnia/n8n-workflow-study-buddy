@@ -31,7 +31,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "corsheaders",  # Add CORS headers app
+    "corsheaders",
+    "chat",
+    "uploads",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
